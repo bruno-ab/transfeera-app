@@ -1,4 +1,5 @@
 import { IsString, IsEmail, IsOptional, IsIn, Length, Matches } from 'class-validator';
+import { IsNotStatus } from '../validators/isNotStatus.decorator';
 
 export class CreateReceiverDTO {
     @IsString()
@@ -27,4 +28,9 @@ export class CreateReceiverDTO {
     @IsEmail({}, { message: 'Invalid email format' })
     @Length(1, 250)
     email?: string;
+
+    @IsNotStatus({
+        message: 'The status field cannot be created'
+    })
+    status?: string;
 }

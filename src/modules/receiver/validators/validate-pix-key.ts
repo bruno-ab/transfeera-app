@@ -6,10 +6,9 @@ export const PixKeyValidator = createParamDecorator(
         const request = ctx.switchToHttp().getRequest();
         const pixKey = request.body.pix_key;
         const pixKeyType = request.body.pix_key_type;
+        const { method, body } = request;
 
-        if (!pixKey || !pixKeyType) {
-            throw new BadRequestException('pix_key and pix_key_type are required');
-        }
+
 
         const isValidCpf = (cpf: string): boolean => {
             return /^[0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2}$/.test(cpf);
@@ -31,31 +30,41 @@ export const PixKeyValidator = createParamDecorator(
             return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
         };
 
-        let isValid = false;
 
-        switch (pixKeyType) {
-            case 'CPF':
-                isValid = isValidCpf(pixKey);
-                break;
-            case 'CNPJ':
-                isValid = isValidCnpj(pixKey);
-                break;
-            case 'EMAIL':
-                isValid = isValidEmail(pixKey);
-                break;
-            case 'TELEFONE':
-                isValid = isValidPhone(pixKey);
-                break;
-            case 'CHAVE_ALEATORIA':
-                isValid = isValidRandomKey(pixKey);
-                break;
-            default:
-                throw new BadRequestException('Invalid pix_key_type');
+        if (method !== 'PUT') {
+            if (!pixKey || !pixKeyType) {
+                throw new BadRequestException('pix_key and pix_key_type are required');
+            }
+
+            let isValid = false;
+
+            switch (pixKeyType) {
+                case 'CPF':
+                    isValid = isValidCpf(pixKey);
+                    break;
+                case 'CNPJ':
+                    isValid = isValidCnpj(pixKey);
+                    break;
+                case 'EMAIL':
+                    isValid = isValidEmail(pixKey);
+                    break;
+                case 'TELEFONE':
+                    isValid = isValidPhone(pixKey);
+                    break;
+                case 'CHAVE_ALEATORIA':
+                    isValid = isValidRandomKey(pixKey);
+                    break;
+                default:
+                    throw new BadRequestException('Invalid pix_key_type');
+            }
+
+            if (!isValid) {
+                throw new BadRequestException(`Invalid pix_key format for type ${pixKeyType}`);
+            }
         }
 
-        if (!isValid) {
-            throw new BadRequestException(`Invalid pix_key format for type ${pixKeyType}`);
-        }
+
+
 
         return { pixKey, pixKeyType };
     },

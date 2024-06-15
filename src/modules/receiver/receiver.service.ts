@@ -13,14 +13,11 @@ export class ReceiverService {
         private receiverRepository: ReceiverRepository
     ) { }
     async createReceiver(data: CreateReceiverDTO) {
-        // const createdReceiver = await this.receiverRepository.createReceiver(data);
-        // return createdReceiver
-        return "createdReceiver"
-    }
-
-    async getReceiver(id: string, data: UpdateReceiverDTO) {
+        const createdReceiver = await this.receiverRepository.createReceiver(data);
+        return createdReceiver
 
     }
+
 
     async listReceivers(query: ListReceiversDTO): Promise<{ receivers: Receiver[], totalPages: number, currentPage: number }> {
         const { page, status, name, pix_key_type, pix_key } = query;
@@ -31,8 +28,15 @@ export class ReceiverService {
             pix_key);
     }
 
-    async updateReceiver(id: string, data: UpdateReceiverDTO) {
+    async updateReceiver(id: string, updateReceiverData: UpdateReceiverDTO) {
+        const receiver = await this.receiverRepository.findReceiverById(id);
+        if (!receiver) {
+            throw new BadRequestException('Receiver not found');
+        }
 
+        this.allowUpdate(receiver, updateReceiverData);
+
+        return await this.receiverRepository.updateReceiver(id, updateReceiverData);
     }
 
     async deleteReceivers(deleteReceivers: DeleteReceiversDTO) {
@@ -40,9 +44,9 @@ export class ReceiverService {
     }
 
     async allowUpdate(receiver: Receiver, updatedData: Partial<Receiver>): Promise<void> {
-        if (receiver.status === 'rascunho') {
+        if (receiver.status === 'Rascunho') {
             return;
-        } else if (receiver.status === 'validado') {
+        } else if (receiver.status === 'Validado') {
             const allowedKeys = ['email'];
             const isUpdateAllowed = Object.keys(updatedData).every(key => allowedKeys.includes(key));
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Get, Query, Param, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateReceiverDTO } from './dto/create-receiver.dto';
 import { UpdateReceiverDTO } from './dto/update-receiver.dto';
@@ -18,7 +18,7 @@ export class ReceiverController {
 
     @Post('/')
     @ApiOperation({ summary: 'Create receiver' })
-    createReceiver(@Body() createReceiverDto: CreateReceiverDTO, @PixKeyValidator() validatedPixKey: { pixKey: string, pixKeyType: string }) {
+    createReceiver(@Body() createReceiverDto: CreateReceiverDTO, @PixKeyValidator() validatedPixKey: { pixKey: string, pixKeyType: string }): Promise<Receiver> {
         createReceiverDto.pix_key = validatedPixKey.pixKey;
         createReceiverDto.pix_key_type = validatedPixKey.pixKeyType;
         return this.receiverService.createReceiver(createReceiverDto);
@@ -29,11 +29,14 @@ export class ReceiverController {
         return this.receiverService.listReceivers(query);
     }
 
-    // @Put('/receiver')
-    // @ApiOperation({ summary: 'Create Receiver' })
-    // createReceiver(@Body() UpdateReceiverDTO: UpdateReceiverDTO) {
-    //     return this.receiverService.updateReceiver(UpdateReceiverDTO);
-    // }
+    @Put('/:id')
+    @ApiOperation({ summary: 'update Receiver' })
+    updateReceiver(@Param() params, @Body() updateReceiverDTO: UpdateReceiverDTO, @PixKeyValidator() validatedPixKey: { pixKey: string, pixKeyType: string }): Promise<Receiver> {
+        updateReceiverDTO.pix_key = validatedPixKey.pixKey;
+        updateReceiverDTO.pix_key_type = validatedPixKey.pixKeyType;
+        const { id } = params;
+        return this.receiverService.updateReceiver(id, updateReceiverDTO);
+    }
 
     @Delete('/')
     @ApiOperation({ summary: 'Delete Receivers' })

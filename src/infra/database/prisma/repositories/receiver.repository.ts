@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma.service';
 import { CreateReceiverDTO } from 'src/modules/receiver/dto/create-receiver.dto';
 import { Receiver } from '@prisma/client';
 import { DeleteReceiversDTO } from 'src/modules/receiver/dto/delete-receivers.dto';
+import { UpdateReceiverDTO } from 'src/modules/receiver/dto/update-receiver.dto';
 
 
 @Injectable()
@@ -59,7 +60,9 @@ export class PrismaReceiverRepository implements PrismaReceiverRepository {
             take,
         });
 
-        const totalReceivers = filteredReceivers.length;
+        const totalReceivers = await this.prisma.receiver.count({
+            where,
+        });
 
         const totalPages = Math.ceil(totalReceivers / take);
 
@@ -68,6 +71,31 @@ export class PrismaReceiverRepository implements PrismaReceiverRepository {
             totalPages,
             currentPage: page,
         };
+    }
+
+    async findReceiverById(id: string): Promise<Receiver> {
+        return await this.prisma.receiver.findUnique({
+            where: {
+                id,
+            },
+        });
+    }
+
+    async updateReceiver(id: string, updateReceiverDTO: UpdateReceiverDTO): Promise<Receiver> {
+
+        const existingReceiver = await this.findReceiverById(id);
+
+        if (!existingReceiver) {
+            throw new NotFoundException('Receiver not found');
+        }
+
+
+        return await this.prisma.receiver.update({
+            where: {
+                id,
+            },
+            data: updateReceiverDTO,
+        });
     }
 
     async deleteReceiversByIds(deleteReceivers: DeleteReceiversDTO): Promise<void> {
