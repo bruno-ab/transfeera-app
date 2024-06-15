@@ -1,34 +1,42 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateReceiverDTO } from './dto/create-receiver.dto';
 import { UpdateReceiverDTO } from './dto/update-receiver.dto';
-import { DeleteReceiverDTO } from './dto/delete-receiver.dto';
+
 import { ReceiverRepository } from '../entity/receiver.repository';
 import { Receiver } from '../entity/receiver.entity';
+import { ListReceiversDTO } from './dto/list-receiver.dto';
+import { DeleteReceiversDTO } from './dto/delete-receivers.dto';
 
 @Injectable()
 export class ReceiverService {
     constructor(
         private receiverRepository: ReceiverRepository
     ) { }
-    async createReceiver(data: CreateReceiverDTO): Promise<Receiver> {
-        const createdReceiver = await this.receiverRepository.createReceiver(data);
-        return createdReceiver
+    async createReceiver(data: CreateReceiverDTO) {
+        // const createdReceiver = await this.receiverRepository.createReceiver(data);
+        // return createdReceiver
+        return "createdReceiver"
     }
 
     async getReceiver(id: string, data: UpdateReceiverDTO) {
 
     }
 
-    async listReceivers(): Promise<Receiver[]> {
-        return await this.receiverRepository.listReceivers();
+    async listReceivers(query: ListReceiversDTO): Promise<{ receivers: Receiver[], totalPages: number, currentPage: number }> {
+        const { page, status, name, pix_key_type, pix_key } = query;
+        return await this.receiverRepository.listReceivers(page,
+            status,
+            name,
+            pix_key_type,
+            pix_key);
     }
 
     async updateReceiver(id: string, data: UpdateReceiverDTO) {
 
     }
 
-    async deleteReceiver(data: DeleteReceiverDTO) {
-
+    async deleteReceivers(deleteReceivers: DeleteReceiversDTO) {
+        this.receiverRepository.deleteReceiversByIds(deleteReceivers);
     }
 
     async allowUpdate(receiver: Receiver, updatedData: Partial<Receiver>): Promise<void> {

@@ -20,7 +20,7 @@ model Receiver {
   bank         String
   bank_agency  String
   bank_account String
-  status       String
+  status       String   @default("RASCUNHO")
   pix_key_type String
   pix_key      String   @map("pix_key")
   email        String?  @unique

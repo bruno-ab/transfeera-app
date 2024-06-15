@@ -1,9 +1,13 @@
-import { Controller, Post, Body, Delete, Get } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateReceiverDTO } from './dto/create-receiver.dto';
 import { UpdateReceiverDTO } from './dto/update-receiver.dto';
-import { DeleteReceiverDTO } from './dto/delete-receiver.dto';
+import { DeleteReceiversDTO } from './dto/delete-receivers.dto';
 import { ReceiverService } from './receiver.service';
+import { PixKeyValidator } from './validators/validate-pix-key';
+import { Receiver } from '@prisma/client';
+import { ListReceiversDTO } from './dto/list-receiver.dto';
+
 
 @ApiTags('Receiver')
 @Controller('receiver')
@@ -14,14 +18,15 @@ export class ReceiverController {
 
     @Post('/')
     @ApiOperation({ summary: 'Create receiver' })
-    createReceiver(@Body() createReceiverDto: CreateReceiverDTO) {
+    createReceiver(@Body() createReceiverDto: CreateReceiverDTO, @PixKeyValidator() validatedPixKey: { pixKey: string, pixKeyType: string }) {
+        createReceiverDto.pix_key = validatedPixKey.pixKey;
+        createReceiverDto.pix_key_type = validatedPixKey.pixKeyType;
         return this.receiverService.createReceiver(createReceiverDto);
     }
 
-    @Get('/list')
-    @ApiOperation({ summary: 'Get a list of receivers' })
-    listReceivers() {
-        return this.receiverService.listReceivers();
+    @Get("/list")
+    async listReceivers(@Query() query: ListReceiversDTO) {
+        return this.receiverService.listReceivers(query);
     }
 
     // @Put('/receiver')
@@ -30,9 +35,9 @@ export class ReceiverController {
     //     return this.receiverService.updateReceiver(UpdateReceiverDTO);
     // }
 
-    // @Delete('/')
-    // @ApiOperation({ summary: 'Create Receiver' })
-    // deleteReceiver(@Body() deleteReceiver: DeleteReceiverDTO) {
-    //     return this.receiverService.createReceiver(deleteReceiver);
-    // }
+    @Delete('/')
+    @ApiOperation({ summary: 'Delete Receivers' })
+    deleteReceivers(@Body() deleteReceiver: DeleteReceiversDTO) {
+        return this.receiverService.deleteReceivers(deleteReceiver);
+    }
 }
