@@ -38,7 +38,4 @@ Este repositório é um starter de projeto usando o framework NestJS com TypeScr
 
 ### Documentação da API
 Acesse a documentação da API Swagger em /api-docs após iniciar o servidor.
-
-
-Licença
-Este projeto é licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
+Na pasta raiz do projeto tem uma collection do Insomnia com os endpoints do CRUD de Receiver
