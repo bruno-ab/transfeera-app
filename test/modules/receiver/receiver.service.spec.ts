@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Receiver } from '@prisma/client';
 import { CreateReceiverDTO } from 'src/modules/receiver/dto/create-receiver.dto';
@@ -356,6 +356,34 @@ describe('ReceiverService', () => {
 
         });
 
+        it('should throw BadRequestException when trying to update fields other than email for "Validado" status', async () => {
+            const receiverId = '99e9e428-71eb-4245-ad0b-342e65e836cg';
+
+            const updateReceiverDTO: UpdateReceiverDTO = {
+                name: 'Brnuo N',
+            };
+
+            const mockReceiver: Receiver = {
+                id: receiverId,
+                name: 'Bruno Alves Botelho',
+                status: 'Validado',
+                document: '08815211118',
+                bank: 'Nubank',
+                bank_agency: '1000',
+                bank_account: '501002713-9',
+                pix_key_type: 'CHAVE_ALEATORIA',
+                pix_key: '123e4567-e89b-12d3-a456-426614174000',
+                email: 'bruno.botelhob@transfeera.com',
+                created_at: new Date(),
+                updated_at: null
+            };
+
+            jest.spyOn(receiverRepository, 'findReceiverById').mockResolvedValue(mockReceiver);
+
+            const exception = new BadRequestException('Only email can be updated for validated receivers');
+            await expect(service.updateReceiver(receiverId, updateReceiverDTO)).rejects.toThrow(exception);
+        });
+
 
 
         it('should throw BadRequestException when receiver not found', async () => {
@@ -364,7 +392,7 @@ describe('ReceiverService', () => {
             };
             jest.spyOn(receiverRepository, 'findReceiverById').mockResolvedValue(null);
 
-            await expect(service.updateReceiver(receiverId, updateReceiverDTO)).rejects.toThrow(BadRequestException);
+            await expect(service.updateReceiver(receiverId, updateReceiverDTO)).rejects.toThrow(NotFoundException);
         });
 
     });

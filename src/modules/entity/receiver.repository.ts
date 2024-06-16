@@ -21,5 +21,5 @@ export abstract class ReceiverRepository {
 
     abstract updateReceiver(id: string, updateReceiverData: UpdateReceiverDTO): Promise<Receiver>;
 
-    abstract deleteReceiversByIds(deleteReceivers: DeleteReceiversDTO): Promise<void>;
+    abstract deleteReceiversByIds(deleteReceivers: DeleteReceiversDTO): Promise<{ deleted: number }>;
 }

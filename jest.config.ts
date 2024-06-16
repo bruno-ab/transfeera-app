@@ -1,7 +1,10 @@
 export default {
     moduleFileExtensions: ['js', 'json', 'ts'],
     modulePaths: ['.'],
-    testRegex: '.*\\.spec\\.ts$',
+    testMatch: [
+        '**/?(*.)+(spec|test).ts',
+        '**/test/modules/**/*.e2e-spec.ts'
+    ],
     transform: {
         '^.+\\.(t|j)s$': 'ts-jest',
     },

@@ -98,31 +98,15 @@ export class PrismaReceiverRepository implements PrismaReceiverRepository {
         });
     }
 
-    async deleteReceiversByIds(deleteReceivers: DeleteReceiversDTO): Promise<void> {
-        await this.prisma.receiver.deleteMany({
+    async deleteReceiversByIds(deleteReceivers: DeleteReceiversDTO): Promise<{ deleted: number }> {
+        const result = await this.prisma.receiver.deleteMany({
             where: {
                 id: {
                     in: deleteReceivers.ids,
                 },
             },
         });
-    }
 
-    async deleteAll(): Promise<void> {
-        const allReceivers = await this.prisma.receiver.findMany({
-            select: {
-                id: true,
-            },
-        });
-
-        const idsToDelete = allReceivers.map(receiver => receiver.id);
-
-        await this.prisma.receiver.deleteMany({
-            where: {
-                id: {
-                    in: idsToDelete,
-                },
-            },
-        });
+        return { deleted: result.count };
     }
 }

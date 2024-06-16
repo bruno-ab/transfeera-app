@@ -32,8 +32,9 @@ export class ReceiverController {
     @Put('/:id')
     @ApiOperation({ summary: 'update Receiver' })
     updateReceiver(@Param() params, @Body() updateReceiverDTO: UpdateReceiverDTO, @PixKeyValidator() validatedPixKey: { pixKey: string, pixKeyType: string }): Promise<Receiver> {
-        updateReceiverDTO.pix_key = validatedPixKey.pixKey;
-        updateReceiverDTO.pix_key_type = validatedPixKey.pixKeyType;
+        if (validatedPixKey.pixKey) updateReceiverDTO.pix_key = validatedPixKey.pixKey;
+        if (validatedPixKey.pixKeyType) updateReceiverDTO.pix_key_type = validatedPixKey.pixKeyType;
+
         const { id } = params;
         return this.receiverService.updateReceiver(id, updateReceiverDTO);
     }

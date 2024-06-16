@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateReceiverDTO } from './dto/create-receiver.dto';
 import { UpdateReceiverDTO } from './dto/update-receiver.dto';
 
@@ -9,38 +9,36 @@ import { DeleteReceiversDTO } from './dto/delete-receivers.dto';
 
 @Injectable()
 export class ReceiverService {
-    constructor(
-        private receiverRepository: ReceiverRepository
-    ) { }
+    constructor(private receiverRepository: ReceiverRepository) { }
+
     async createReceiver(data: CreateReceiverDTO) {
         const createdReceiver = await this.receiverRepository.createReceiver(data);
-        return createdReceiver
-
+        return createdReceiver;
     }
-
 
     async listReceivers(query: ListReceiversDTO): Promise<{ receivers: Receiver[], totalPages: number, currentPage: number }> {
         const { page, status, name, pix_key_type, pix_key } = query;
-        return await this.receiverRepository.listReceivers(page,
-            status,
-            name,
-            pix_key_type,
-            pix_key);
+        return await this.receiverRepository.listReceivers(page, status, name, pix_key_type, pix_key);
     }
 
     async updateReceiver(id: string, updateReceiverData: UpdateReceiverDTO) {
         const receiver = await this.receiverRepository.findReceiverById(id);
         if (!receiver) {
-            throw new BadRequestException('Receiver not found');
+            throw new NotFoundException('Receiver not found');
         }
 
-        this.allowUpdate(receiver, updateReceiverData);
+        try {
+            await this.allowUpdate(receiver, updateReceiverData);
 
-        return await this.receiverRepository.updateReceiver(id, updateReceiverData);
+            const updatedReceiver = await this.receiverRepository.updateReceiver(id, updateReceiverData);
+            return updatedReceiver;
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
     }
 
     async deleteReceivers(deleteReceivers: DeleteReceiversDTO) {
-        this.receiverRepository.deleteReceiversByIds(deleteReceivers);
+        return await this.receiverRepository.deleteReceiversByIds(deleteReceivers);
     }
 
     async allowUpdate(receiver: Receiver, updatedData: Partial<Receiver>): Promise<void> {
@@ -53,10 +51,8 @@ export class ReceiverService {
             if (!isUpdateAllowed) {
                 throw new BadRequestException('Only email can be updated for validated receivers');
             }
-
         } else {
             throw new BadRequestException('Receiver status does not allow updates');
         }
     }
-
 }
